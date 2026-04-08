@@ -1,35 +1,22 @@
 # ===== Build stage =====
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-COPY mvnw .
-COPY .mvn .mvn
 COPY pom.xml .
-
-RUN ./mvnw dependency:go-offline -q
+RUN mvn dependency:go-offline -q
 
 COPY src ./src
-
-RUN ./mvnw clean package -DskipTests -q
+RUN mvn clean package -DskipTests -q
 
 # ===== Runtime stage =====
-FROM eclipse-temurin:21-jre-alpine AS runtime
-
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+FROM eclipse-temurin:21-jre-jammy AS runtime
 
 WORKDIR /app
 
 COPY --from=builder /app/target/*.jar app.jar
 
-RUN chown appuser:appgroup app.jar
-
-USER appuser
-
 EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD wget -qO- http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java", \
   "-XX:+UseContainerSupport", \
