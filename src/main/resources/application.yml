@@ -2,11 +2,16 @@ spring:
   application:
     name: beauty-scheduler
 
-  profiles:
-    active: dev
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/beauty_scheduler}
+    username: ${SPRING_DATASOURCE_USERNAME:beauty_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:beauty_pass}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     open-in-view: false
+    hibernate:
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
@@ -17,7 +22,17 @@ spring:
     baseline-on-migrate: true
 
   mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
 
   servlet:
     multipart:
@@ -55,5 +70,5 @@ cloudinary:
 
 logging:
   level:
-    com.beautyscheduler: DEBUG
+    com.beautyscheduler: INFO
     org.springframework.security: INFO
