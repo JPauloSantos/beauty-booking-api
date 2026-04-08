@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: beauty-scheduler-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: beauty_scheduler
+      POSTGRES_USER: beauty_user
+      POSTGRES_PASSWORD: beauty_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U beauty_user -d beauty_scheduler"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: beauty-scheduler-mail
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: beauty-scheduler-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/beauty_scheduler
+      SPRING_DATASOURCE_USERNAME: beauty_user
+      SPRING_DATASOURCE_PASSWORD: beauty_pass
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production-must-be-256-bits}
+      CLOUDINARY_URL: ${CLOUDINARY_URL:-cloudinary://key:secret@cloud}
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_logs:/app/logs
+
+volumes:
+  postgres_data:
+  app_logs:

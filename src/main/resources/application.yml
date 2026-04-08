@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: beauty-scheduler
+
+  profiles:
+    active: dev
+
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  mail:
+    default-encoding: UTF-8
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  api-docs:
+    path: /v3/api-docs
+
+jwt:
+  secret: ${JWT_SECRET:beauty-scheduler-dev-secret-key-at-least-256-bits-long-for-hmac}
+  expiration-ms: 86400000
+
+cloudinary:
+  url: ${CLOUDINARY_URL:cloudinary://api_key:api_secret@cloud_name}
+
+logging:
+  level:
+    com.beautyscheduler: DEBUG
+    org.springframework.security: INFO
