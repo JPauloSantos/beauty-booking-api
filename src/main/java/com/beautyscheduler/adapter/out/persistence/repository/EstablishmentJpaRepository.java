@@ -14,13 +14,22 @@ public interface EstablishmentJpaRepository extends JpaRepository<EstablishmentJ
 
     @Query("""
         SELECT DISTINCT e FROM EstablishmentJpaEntity e
-        LEFT JOIN BeautyServiceJpaEntity s ON s.establishmentId = e.id
         WHERE e.active = true
         AND (:name IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')))
         AND (:city IS NULL OR LOWER(e.city) LIKE LOWER(CONCAT('%', :city, '%')))
-        AND (:serviceName IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :serviceName, '%')))
-        AND (:minPrice IS NULL OR s.price >= :minPrice)
-        AND (:maxPrice IS NULL OR s.price <= :maxPrice)
+        AND (:serviceName IS NULL OR EXISTS (
+            SELECT s FROM BeautyServiceJpaEntity s
+            WHERE s.establishmentId = e.id
+            AND LOWER(s.name) LIKE LOWER(CONCAT('%', :serviceName, '%'))
+        ))
+        AND (:minPrice IS NULL OR EXISTS (
+            SELECT s FROM BeautyServiceJpaEntity s
+            WHERE s.establishmentId = e.id AND s.price >= :minPrice
+        ))
+        AND (:maxPrice IS NULL OR EXISTS (
+            SELECT s FROM BeautyServiceJpaEntity s
+            WHERE s.establishmentId = e.id AND s.price <= :maxPrice
+        ))
     """)
     List<EstablishmentJpaEntity> search(
             @Param("name") String name,
