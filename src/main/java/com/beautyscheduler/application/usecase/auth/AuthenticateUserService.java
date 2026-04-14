@@ -36,7 +36,7 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
             throw new UnauthorizedException("Invalid credentials.");
         }
 
-        String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
+        String token = jwtTokenProvider.generateToken(user.getId().toString(), user.getRole().name());
         return new Result(token, user.getEmail(), user.getRole().name());
     }
 }
