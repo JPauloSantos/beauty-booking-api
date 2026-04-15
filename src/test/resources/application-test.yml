@@ -21,6 +21,14 @@ spring:
     port: 3025
     username: test
     password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+          connectiontimeout: 500
+          timeout: 500
 
 jwt:
   secret: test-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256
