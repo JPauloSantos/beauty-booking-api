@@ -1,6 +1,12 @@
 package com.beautyscheduler.integration;
 
-import com.beautyscheduler.adapter.in.web.dto.request.*;
+import com.beautyscheduler.adapter.in.web.dto.request.CreateAppointmentRequest;
+import com.beautyscheduler.adapter.in.web.dto.request.CreateBeautyServiceRequest;
+import com.beautyscheduler.adapter.in.web.dto.request.CreateEstablishmentRequest;
+import com.beautyscheduler.adapter.in.web.dto.request.CreateProfessionalRequest;
+import com.beautyscheduler.adapter.in.web.dto.request.LoginRequest;
+import com.beautyscheduler.adapter.in.web.dto.request.RegisterUserRequest;
+import com.beautyscheduler.adapter.in.web.dto.request.RescheduleAppointmentRequest;
 import com.beautyscheduler.adapter.in.web.dto.response.AppointmentResponse;
 import com.beautyscheduler.adapter.in.web.dto.response.AuthResponse;
 import com.beautyscheduler.adapter.in.web.dto.response.EstablishmentResponse;
@@ -184,5 +190,63 @@ class AppointmentControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should get appointment by ID")
+    void shouldGetAppointmentById() throws Exception {
+        MvcResult created = mockMvc.perform(post("/api/v1/appointments")
+                .header("Authorization", "Bearer " + clientToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new CreateAppointmentRequest(
+                        professionalId, serviceId, establishmentId,
+                        LocalDateTime.now().plusDays(5), null))))
+                .andExpect(status().isCreated()).andReturn();
+
+        UUID apptId = objectMapper.readValue(
+                created.getResponse().getContentAsString(), AppointmentResponse.class).id();
+
+        mockMvc.perform(get("/api/v1/appointments/" + apptId)
+                .header("Authorization", "Bearer " + clientToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PENDING"));
+    }
+
+    @Test
+    @DisplayName("Should get appointments by establishment")
+    void shouldGetAppointmentsByEstablishment() throws Exception {
+        mockMvc.perform(post("/api/v1/appointments")
+                .header("Authorization", "Bearer " + clientToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new CreateAppointmentRequest(
+                        professionalId, serviceId, establishmentId,
+                        LocalDateTime.now().plusDays(6), null))));
+
+        mockMvc.perform(get("/api/v1/appointments/establishment/" + establishmentId)
+                .header("Authorization", "Bearer " + clientToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("Should reschedule appointment")
+    void shouldRescheduleAppointment() throws Exception {
+        MvcResult created = mockMvc.perform(post("/api/v1/appointments")
+                .header("Authorization", "Bearer " + clientToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new CreateAppointmentRequest(
+                        professionalId, serviceId, establishmentId,
+                        LocalDateTime.now().plusDays(7), null))))
+                .andExpect(status().isCreated()).andReturn();
+
+        UUID apptId = objectMapper.readValue(
+                created.getResponse().getContentAsString(), AppointmentResponse.class).id();
+
+        mockMvc.perform(patch("/api/v1/appointments/" + apptId + "/reschedule")
+                .header("Authorization", "Bearer " + clientToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                        new RescheduleAppointmentRequest(LocalDateTime.now().plusDays(14)))))
+                .andExpect(status().isOk());
     }
 }
