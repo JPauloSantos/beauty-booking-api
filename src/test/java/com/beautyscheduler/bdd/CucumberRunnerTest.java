@@ -11,7 +11,7 @@ import static io.cucumber.junit.platform.engine.Constants.GLUE_PROPERTY_NAME;
 @Suite
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
-@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.beautyscheduler.bdd.steps")
+@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.beautyscheduler.bdd")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME,
         value = "pretty, html:target/cucumber-reports/report.html, json:target/cucumber-reports/report.json")
 class CucumberRunnerTest {}

@@ -25,14 +25,16 @@ class AuthenticateUserServiceTest {
 
     @Mock private UserRepositoryPort userRepository;
     @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtTokenProvider jwtTokenProvider;
 
+    private JwtTokenProvider jwtTokenProvider;
     private AuthenticateUserService service;
-
     private User activeUser;
 
     @BeforeEach
     void setUp() {
+        jwtTokenProvider = new JwtTokenProvider(
+                "test-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256",
+                3600000L);
         service = new AuthenticateUserService(userRepository, passwordEncoder, jwtTokenProvider);
         activeUser = User.create("Alice", "alice@email.com", "hashedPass", User.UserRole.CLIENT, "11999999999");
     }
@@ -45,11 +47,10 @@ class AuthenticateUserServiceTest {
 
         when(userRepository.findByEmail("alice@email.com")).thenReturn(Optional.of(activeUser));
         when(passwordEncoder.matches("rawPass", "hashedPass")).thenReturn(true);
-        when(jwtTokenProvider.generateToken(anyString(), anyString())).thenReturn("jwt-token");
 
         AuthenticateUserUseCase.Result result = service.execute(command);
 
-        assertThat(result.token()).isEqualTo("jwt-token");
+        assertThat(result.token()).isNotBlank();
         assertThat(result.email()).isEqualTo("alice@email.com");
         assertThat(result.role()).isEqualTo("CLIENT");
     }
