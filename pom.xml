@@ -168,7 +168,7 @@
 
     <build>
         <plugins>
-            <!-- Maven Surefire - print failures to console for CI diagnostics -->
+            <!-- Maven Surefire -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -176,6 +176,8 @@
                     <redirectTestOutputToFile>false</redirectTestOutputToFile>
                     <printSummary>true</printSummary>
                     <useFile>false</useFile>
+                    <!-- Ensure JaCoCo agent is attached even with explicit Surefire config -->
+                    <argLine>@{argLine}</argLine>
                 </configuration>
             </plugin>
 
