@@ -4,6 +4,7 @@ import com.beautyscheduler.adapter.in.web.dto.request.CreateEstablishmentRequest
 import com.beautyscheduler.adapter.in.web.dto.request.LoginRequest;
 import com.beautyscheduler.adapter.in.web.dto.request.RegisterUserRequest;
 import com.beautyscheduler.adapter.in.web.dto.response.AuthResponse;
+import com.beautyscheduler.adapter.in.web.dto.response.EstablishmentResponse;
 import com.beautyscheduler.domain.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -103,5 +106,51 @@ class EstablishmentControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidJson))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should get establishment by ID")
+    void shouldGetEstablishmentById() throws Exception {
+        CreateEstablishmentRequest request = new CreateEstablishmentRequest(
+                "Salão Get", "Desc", "Rua B", "10", null, "Centro",
+                "Campinas", "SP", "13010-000", null, null);
+
+        MvcResult created = mockMvc.perform(post("/api/v1/establishments")
+                .header("Authorization", "Bearer " + ownerToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated()).andReturn();
+
+        UUID id = objectMapper.readValue(
+                created.getResponse().getContentAsString(), EstablishmentResponse.class).id();
+
+        mockMvc.perform(get("/api/v1/establishments/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Salão Get"));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when establishment not found")
+    void shouldReturn404WhenNotFound() throws Exception {
+        mockMvc.perform(get("/api/v1/establishments/" + UUID.randomUUID()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should get my establishments")
+    void shouldGetMyEstablishments() throws Exception {
+        CreateEstablishmentRequest request = new CreateEstablishmentRequest(
+                "Meu Salão", "Desc", "Rua C", "20", null, "Bairro",
+                "Rio de Janeiro", "RJ", "20000-000", null, null);
+
+        mockMvc.perform(post("/api/v1/establishments")
+                .header("Authorization", "Bearer " + ownerToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        mockMvc.perform(get("/api/v1/establishments/my")
+                .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 }

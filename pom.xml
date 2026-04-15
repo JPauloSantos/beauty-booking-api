@@ -230,7 +230,12 @@
                                 <exclude>com/beautyscheduler/BeautySchedulerApplication.class</exclude>
                                 <exclude>com/beautyscheduler/adapter/in/web/dto/**</exclude>
                                 <exclude>com/beautyscheduler/adapter/out/persistence/entity/**</exclude>
+                                <exclude>com/beautyscheduler/adapter/out/persistence/mapper/**</exclude>
+                                <exclude>com/beautyscheduler/adapter/out/email/**</exclude>
+                                <exclude>com/beautyscheduler/adapter/out/storage/**</exclude>
+                                <exclude>com/beautyscheduler/adapter/out/calendar/**</exclude>
                                 <exclude>com/beautyscheduler/infrastructure/config/**</exclude>
+                                <exclude>com/beautyscheduler/infrastructure/scheduler/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>
