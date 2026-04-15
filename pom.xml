@@ -200,6 +200,34 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
+                <!-- Plugin-level config is used by both lifecycle execution AND
+                     direct CLI invocation (mvn jacoco:check uses 'default-cli'
+                     execution which inherits this configuration) -->
+                <configuration>
+                    <rules>
+                        <rule>
+                            <element>BUNDLE</element>
+                            <limits>
+                                <limit>
+                                    <counter>LINE</counter>
+                                    <value>COVEREDRATIO</value>
+                                    <minimum>0.10</minimum>
+                                </limit>
+                            </limits>
+                        </rule>
+                    </rules>
+                    <excludes>
+                        <exclude>com/beautyscheduler/BeautySchedulerApplication.class</exclude>
+                        <exclude>com/beautyscheduler/adapter/in/web/dto/**</exclude>
+                        <exclude>com/beautyscheduler/adapter/out/persistence/entity/**</exclude>
+                        <exclude>com/beautyscheduler/adapter/out/persistence/mapper/**</exclude>
+                        <exclude>com/beautyscheduler/adapter/out/email/**</exclude>
+                        <exclude>com/beautyscheduler/adapter/out/storage/**</exclude>
+                        <exclude>com/beautyscheduler/adapter/out/calendar/**</exclude>
+                        <exclude>com/beautyscheduler/infrastructure/config/**</exclude>
+                        <exclude>com/beautyscheduler/infrastructure/scheduler/**</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -216,34 +244,10 @@
                     </execution>
                     <execution>
                         <id>check</id>
+                        <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
-                        <configuration>
-                            <rules>
-                                <rule>
-                                    <element>BUNDLE</element>
-                                    <limits>
-                                        <limit>
-                                            <counter>LINE</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.10</minimum>
-                                        </limit>
-                                    </limits>
-                                </rule>
-                            </rules>
-                            <excludes>
-                                <exclude>com/beautyscheduler/BeautySchedulerApplication.class</exclude>
-                                <exclude>com/beautyscheduler/adapter/in/web/dto/**</exclude>
-                                <exclude>com/beautyscheduler/adapter/out/persistence/entity/**</exclude>
-                                <exclude>com/beautyscheduler/adapter/out/persistence/mapper/**</exclude>
-                                <exclude>com/beautyscheduler/adapter/out/email/**</exclude>
-                                <exclude>com/beautyscheduler/adapter/out/storage/**</exclude>
-                                <exclude>com/beautyscheduler/adapter/out/calendar/**</exclude>
-                                <exclude>com/beautyscheduler/infrastructure/config/**</exclude>
-                                <exclude>com/beautyscheduler/infrastructure/scheduler/**</exclude>
-                            </excludes>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
